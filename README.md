@@ -1,0 +1,215 @@
+# ReactGame
+
+A React renderer for game development - "React Native for games". ReactGame allows you to build games using familiar React patterns and JSX, but instead of rendering to the DOM, it renders to Canvas/WebGL.
+
+## Features
+
+- 🎮 **React-powered game development** - Use React components to control game objects
+- 🔄 **Custom reconciler** - Built with `react-reconciler` for efficient updates
+- 🎨 **Pluggable rendering** - Adapter pattern allows switching rendering engines
+- 🎯 **Game loop integration** - Built-in game loop with React hooks
+- 📦 **TypeScript support** - Fully typed for better development experience
+
+## Quick Start
+
+```bash
+npm install react-game
+```
+
+```jsx
+import { useState } from "react";
+import { render, Scene, Sprite, useGameLoop } from "react-game";
+
+function MovingSprite() {
+  const [x, setX] = useState(100);
+
+  useGameLoop((deltaTime) => {
+    setX((x) => x + 50 * deltaTime); // Move 50 pixels per second
+  });
+
+  return <Sprite x={x} y={100} width={32} height={32} />;
+}
+
+function App() {
+  return (
+    <Scene backgroundColor="#001122">
+      <MovingSprite />
+    </Scene>
+  );
+}
+
+// Pure ReactGame - no React DOM needed!
+const canvas = document.createElement("canvas");
+canvas.width = 800;
+canvas.height = 600;
+document.body.appendChild(canvas);
+
+render(<App />, canvas);
+```
+
+## Core Components
+
+### `<Game>`
+
+The root component that creates the canvas and manages the game loop.
+
+```jsx
+<Game width={800} height={600}>
+  {/* Your game content */}
+</Game>
+```
+
+### `<Scene>`
+
+Container for game objects with scene-level properties.
+
+```jsx
+<Scene backgroundColor="#001122" width={800} height={600}>
+  {/* Sprites and other game objects */}
+</Scene>
+```
+
+### `<Sprite>`
+
+Renderable game object with position, size, and visual properties.
+
+```jsx
+<Sprite
+  x={100}
+  y={100}
+  width={32}
+  height={32}
+  texture="path/to/image.png"
+  rotation={Math.PI / 4}
+  alpha={0.8}
+  visible={true}
+/>
+```
+
+## Hooks
+
+### `useGameLoop(callback)`
+
+Execute code every frame with delta time.
+
+```jsx
+useGameLoop((deltaTime) => {
+  // Update logic here
+  setPosition((pos) => ({ x: pos.x + speed * deltaTime, y: pos.y }));
+});
+```
+
+### `useDeltaTime()`
+
+Get the current frame's delta time.
+
+```jsx
+const deltaTime = useDeltaTime();
+```
+
+### `useUpdate(callback)`
+
+Alias for `useGameLoop` - more semantic for component updates.
+
+## Architecture
+
+ReactGame is a **pure custom React renderer** - no React DOM required!
+
+1. **Custom Reconciler**: Manages `<Scene>` and `<Sprite>` components directly
+2. **Canvas Rendering**: All components render to Canvas/WebGL instead of DOM
+3. **Pure React**: Use React patterns (JSX, hooks, state) without DOM overhead
+4. **Game Loop Integration**: Built-in game loop with `useGameLoop` hook
+
+This means:
+
+- ✅ **No React DOM dependency** - truly independent renderer
+- ✅ **Pure React patterns** - JSX, hooks, state, props
+- ✅ **Direct Canvas rendering** - maximum performance
+- ✅ **Game-optimized** - 60fps game loop built-in
+
+### Usage Patterns
+
+**Pure ReactGame (recommended):**
+
+```jsx
+import { render, Scene, Sprite } from "react-game";
+render(
+  <Scene>
+    <Sprite x={100} y={100} />
+  </Scene>,
+  canvas
+);
+```
+
+**In existing React apps:**
+
+```jsx
+import { Game, Scene, Sprite } from "react-game";
+// Game component bridges to existing React DOM apps
+<Game width={800} height={600}>
+  <Scene>
+    <Sprite x={100} y={100} />
+  </Scene>
+</Game>;
+```
+
+The adapter pattern allows you to swap rendering engines:
+
+- `CanvasAdapter` - 2D Canvas rendering (included)
+- Custom adapters for Three.js, PixiJS, or other engines
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Build the library
+npm run build
+
+# Run the demo
+npm run demo
+```
+
+## Demo
+
+The demo showcases:
+
+- Moving sprite with collision detection
+- Rotating sprite animation
+- Pulsing sprite with scale changes
+- Multiple sprites in a scene
+
+## Rendering Adapters
+
+### Canvas 2D (Built-in)
+
+Basic 2D rendering using HTML5 Canvas.
+
+### Custom Adapters
+
+Implement the `RenderAdapter` interface to support other engines:
+
+```typescript
+interface RenderAdapter {
+  initialize(canvas: HTMLCanvasElement, width: number, height: number): void;
+  createSprite(props: SpriteProps): any;
+  updateSprite(sprite: any, props: SpriteProps): void;
+  // ... other methods
+}
+```
+
+## License
+
+MIT
+
+## Contributing
+
+Contributions welcome! This is a minimal implementation focused on proving the concept. Future enhancements could include:
+
+- Physics integration
+- Audio system
+- Input handling
+- Asset management
+- Advanced rendering features
+- More rendering adapters (Three.js, PixiJS)

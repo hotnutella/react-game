@@ -1,0 +1,37 @@
+{
+  "name": "react-game",
+  "version": "0.1.0",
+  "description": "A React renderer for game development - React Native for games",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "demo": "npm run build && webpack serve --config demo/webpack.config.js",
+    "demo:build": "npm run build && webpack --config demo/webpack.config.js",
+    "demo:only": "webpack serve --config demo/webpack.config.js",
+    "test": "jest",
+    "link:local": "npm run build && npm link",
+    "clean": "rm -rf dist dist-demo"
+  },
+  "keywords": ["react", "game", "renderer", "canvas", "webgl"],
+  "author": "ReactGame Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "dependencies": {
+    "react-reconciler": "^0.29.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-reconciler": "^0.28.0",
+    "typescript": "^5.0.0",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0",
+    "webpack-dev-server": "^4.15.0",
+    "html-webpack-plugin": "^5.5.0",
+    "ts-loader": "^9.4.0",
+    "react": "^18.2.0"
+  }
+}
