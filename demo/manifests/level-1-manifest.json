@@ -1,0 +1,14 @@
+{
+  "textures": {
+    "platform": "/assets/sample.svg",
+    "spike": "/assets/sample.svg",
+    "coin": "/assets/sample.svg",
+    "door": "/assets/sample.svg",
+    "key": "/assets/sample.svg"
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "name": "Level 1 Assets",
+    "description": "First level specific assets"
+  }
+}

@@ -1,6 +1,12 @@
 import { useRef, useEffect, useState } from "react";
 import { Scene, Sprite, Animation, Easing } from "../src/components";
 import type { AnimationControls } from "../src/components";
+import {
+  useMyManifest,
+  useUiManifest,
+  type MyManifestAssets,
+  type UiManifestAssets,
+} from "./manifests/manifestTypes";
 import { render } from "../src/index";
 
 // Controlled Animation example with visual feedback
@@ -131,7 +137,7 @@ function ControlledAnimation() {
 }
 
 // Animated Sprites to test Animation component
-function AnimatedSprites() {
+function AnimatedSprites({ assets }: { assets: MyManifestAssets }) {
   return (
     <>
       {/* Bouncing sprite with easeInOutQuad */}
@@ -170,7 +176,7 @@ function AnimatedSprites() {
         <Sprite />
       </Animation>
 
-      {/* Animated sprite with SVG texture */}
+      {/* Animated sprite with SVG texture using assets object */}
       <Animation
         from={{ x: 50, y: 50, rotation: 0 }}
         to={{ x: 300, y: 250, rotation: 360 }}
@@ -179,31 +185,70 @@ function AnimatedSprites() {
         loop={true}
         reverse={true}
       >
-        <Sprite width={48} height={48} texture="/assets/sample.svg" />
+        <Sprite width={48} height={48} texture={assets.enemy} />
       </Animation>
     </>
   );
 }
 
-// Minimal Demo App - Test useGameLoop and Animation functionality
-function DemoApp() {
+// UI Component using UI manifest
+function UIElements() {
+  const { assets: ui } = useUiManifest();
+
   return (
-    <Scene backgroundColor="#001122">
-      <AnimatedSprites />
+    <>
+      {/* UI buttons */}
+      <Sprite
+        x={50}
+        y={50}
+        width={100}
+        height={30}
+        texture={ui.button_primary}
+      />
+      <Sprite
+        x={50}
+        y={90}
+        width={100}
+        height={30}
+        texture={ui.button_secondary}
+      />
+      <Sprite x={700} y={50} width={20} height={20} texture={ui.close_icon} />
+    </>
+  );
+}
+
+// Component that uses manifest - must be inside Scene
+function GameContent() {
+  const { assets, loading, error, progress } = useMyManifest();
+
+  if (error) {
+    console.error("Failed to load manifest:", error);
+  }
+
+  if (loading) {
+    console.log(
+      `Loading assets: ${progress.loaded}/${progress.total} (${progress.percentage}%)`
+    );
+  }
+
+  return (
+    <>
+      <UIElements />
+      <AnimatedSprites assets={assets} />
       <ControlledAnimation />
       {/* Static sprites for reference */}
       <Sprite x={600} y={500} width={30} height={30} />
       <Sprite x={700} y={500} width={40} height={40} />
 
-      {/* Sprite with SVG texture */}
+      {/* Sprite with SVG texture using assets object */}
       <Sprite
         x={400}
         y={100}
         width={64}
         height={64}
-        texture="/assets/sample.svg"
+        texture={assets.sample_icon}
       />
-      {/* Fading in and out Sprite with SVG texture */}
+      {/* Fading in and out Sprite with SVG texture using assets object */}
       <Animation
         from={{ alpha: 0, rotation: 0 }}
         to={{ alpha: 1, rotation: 180 }}
@@ -212,14 +257,17 @@ function DemoApp() {
         loop={true}
         reverse={true}
       >
-        <Sprite
-          x={600}
-          y={100}
-          width={64}
-          height={64}
-          texture="/assets/sample.svg"
-        />
+        <Sprite x={600} y={100} width={64} height={64} texture={assets.hero} />
       </Animation>
+    </>
+  );
+}
+
+// Minimal Demo App - Test useGameLoop and Animation functionality with manifest
+function DemoApp() {
+  return (
+    <Scene backgroundColor="#001122">
+      <GameContent />
     </Scene>
   );
 }

@@ -1,0 +1,13 @@
+{
+  "textures": {
+    "button_primary": "/assets/sample.svg",
+    "button_secondary": "/assets/sample.svg",
+    "menu_background": "/assets/sample.svg",
+    "close_icon": "/assets/sample.svg"
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "name": "UI Assets",
+    "description": "User interface elements"
+  }
+}

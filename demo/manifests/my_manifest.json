@@ -1,0 +1,14 @@
+{
+  "textures": {
+    "sample_icon": "/assets/sample.svg",
+    "hero": "/assets/sample.svg",
+    "enemy": "/assets/sample.svg",
+    "background": "/assets/sample.svg",
+    "door": "/assets/sample.svg"
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "name": "Demo Assets",
+    "description": "Assets for ReactGame demo"
+  }
+}

@@ -4,12 +4,18 @@
   "description": "A React renderer for game development - React Native for games",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "react-game": "./bin/react-game"
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/cli/*.js dist/cli/",
     "dev": "tsc --watch",
-    "demo": "npm run build && webpack serve --config demo/webpack.config.js",
-    "demo:build": "npm run build && webpack --config demo/webpack.config.js",
-    "demo:only": "webpack serve --config demo/webpack.config.js",
+    "demo": "npm run build && npm run demo:types && npm run demo:dev",
+    "demo:build": "npm run build && npm run demo:types && webpack --config demo/webpack.config.js",
+    "demo:dev": "webpack serve --config demo/webpack.config.js",
+    "demo:types": "node dist/cli/index.js generate-types demo/manifests",
+    "demo:watch": "npm run build && (node dist/cli/index.js watch-manifests demo/manifests &) && npm run demo:dev",
+    "demo:types-watch": "npm run build && node dist/cli/index.js watch-manifests demo/manifests",
     "test": "jest",
     "link:local": "npm run build && npm link",
     "clean": "rm -rf dist dist-demo"
@@ -32,6 +38,7 @@
     "webpack-dev-server": "^4.15.0",
     "html-webpack-plugin": "^5.5.0",
     "ts-loader": "^9.4.0",
+    "ts-node": "^10.9.0",
     "react": "^18.2.0"
   }
 }

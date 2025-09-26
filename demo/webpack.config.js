@@ -36,6 +36,10 @@ module.exports = {
       {
         directory: path.join(__dirname, 'assets'),
         publicPath: '/assets',
+      },
+      {
+        directory: path.join(__dirname, 'manifests'),
+        publicPath: '/manifests',
       }
     ],
     compress: true,

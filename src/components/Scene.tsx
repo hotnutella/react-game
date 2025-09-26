@@ -1,4 +1,5 @@
 import React from "react";
+import { ManifestProvider } from "../manifest/ManifestContext";
 
 export interface SceneProps {
   width?: number;
@@ -6,16 +7,16 @@ export interface SceneProps {
   backgroundColor?: string;
 }
 
-// Scene component
+// Scene component with built-in ManifestProvider
 export function Scene({
   width,
   height,
   backgroundColor,
   children,
-}: SceneProps & { children?: React.ReactNode }) {
+}: SceneProps & { children?: React.ReactNode }): React.ReactElement {
   return React.createElement(
-    "scene",
-    { width, height, backgroundColor },
-    children
+    ManifestProvider,
+    null,
+    React.createElement("scene", { width, height, backgroundColor }, children)
   );
 }

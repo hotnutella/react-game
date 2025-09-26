@@ -47,6 +47,30 @@ document.body.appendChild(canvas);
 render(<App />, canvas);
 ```
 
+## 🎯 Asset Management with Manifests
+
+ReactGame includes built-in asset management with TypeScript support:
+
+```bash
+# Initialize manifest system
+npx react-game init-manifests src/manifests
+
+# Watch and auto-regenerate types
+npx react-game watch-manifests src/manifests
+```
+
+```tsx
+// Auto-generated typed hooks
+import { useGameManifest } from "./src/manifests/manifestTypes";
+
+function Player() {
+  const { assets } = useGameManifest(); // Perfect TypeScript support!
+  return <Sprite texture={assets.hero} x={100} y={100} />;
+}
+```
+
+See [MANIFEST_GUIDE.md](./MANIFEST_GUIDE.md) for complete documentation.
+
 ## Core Components
 
 ### `<Game>`
