@@ -14,12 +14,12 @@ function ControlledAnimation() {
     let currentStep = 0;
     const steps = [
       { delay: 1000, action: "start", message: "▶️  STARTING animation..." },
-      { delay: 3000, action: "pause", message: "⏸️  PAUSING animation..." },
-      { delay: 5000, action: "resume", message: "▶️  RESUMING animation..." },
-      { delay: 7000, action: "pause", message: "⏸️  PAUSING again..." },
-      { delay: 9000, action: "stop", message: "⏹️  STOPPING animation..." },
-      { delay: 11000, action: "reset", message: "🔄  RESETTING animation..." },
-      { delay: 12000, action: "start", message: "▶️  STARTING again..." },
+      { delay: 2000, action: "pause", message: "⏸️  PAUSING animation..." },
+      { delay: 1000, action: "resume", message: "▶️  RESUMING animation..." },
+      { delay: 1000, action: "pause", message: "⏸️  PAUSING again..." },
+      { delay: 2000, action: "reset", message: "🔄  RESETTING animation..." },
+      { delay: 2000, action: "start", message: "▶️  STARTING again..." },
+      { delay: 1000, action: "stop", message: "⏹️  STOPPING animation..." },
     ];
 
     const executeStep = () => {
