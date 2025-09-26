@@ -113,6 +113,8 @@ function ControlledAnimation() {
         alpha={animationState === "pause" ? 1 : 0.3}
       />
 
+      <Sprite x={610} y={50} width={15} height={15} texture="" />
+
       {/* Progress bar made of sprites */}
       {Array.from({ length: 10 }, (_, i) => (
         <Sprite
@@ -147,7 +149,7 @@ function AnimatedSprites() {
       {/* Rotating and scaling sprite */}
       <Animation
         from={{ x: 400, y: 200, rotation: 0, alpha: 0.5 }}
-        to={{ x: 400, y: 400, rotation: 360, alpha: 1 }}
+        to={{ x: 400, y: 400, rotation: 720, alpha: 1 }}
         duration={3}
         easing={Easing.easeInOutCubic}
         loop={true}
@@ -167,6 +169,18 @@ function AnimatedSprites() {
       >
         <Sprite />
       </Animation>
+
+      {/* Animated sprite with SVG texture */}
+      <Animation
+        from={{ x: 50, y: 50, rotation: 0 }}
+        to={{ x: 300, y: 250, rotation: 360 }}
+        duration={4}
+        easing={Easing.easeInOutQuad}
+        loop={true}
+        reverse={true}
+      >
+        <Sprite width={48} height={48} texture="/assets/sample.svg" />
+      </Animation>
     </>
   );
 }
@@ -180,6 +194,32 @@ function DemoApp() {
       {/* Static sprites for reference */}
       <Sprite x={600} y={500} width={30} height={30} />
       <Sprite x={700} y={500} width={40} height={40} />
+
+      {/* Sprite with SVG texture */}
+      <Sprite
+        x={400}
+        y={100}
+        width={64}
+        height={64}
+        texture="/assets/sample.svg"
+      />
+      {/* Fading in and out Sprite with SVG texture */}
+      <Animation
+        from={{ alpha: 0, rotation: 0 }}
+        to={{ alpha: 1, rotation: 180 }}
+        duration={2}
+        easing={Easing.easeInOutQuad}
+        loop={true}
+        reverse={true}
+      >
+        <Sprite
+          x={600}
+          y={100}
+          width={64}
+          height={64}
+          texture="/assets/sample.svg"
+        />
+      </Animation>
     </Scene>
   );
 }

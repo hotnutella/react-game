@@ -144,14 +144,37 @@ export class CanvasAdapter implements RenderAdapter {
       children: [],
     };
     
+    // Resize canvas if scene dimensions are specified
+    if (props.width !== undefined || props.height !== undefined) {
+      this.canvas.width = scene.width;
+      this.canvas.height = scene.height;
+    }
+    
     this.scene = scene;
     return scene;
   }
 
   updateScene(scene: CanvasScene, props: SceneProps): void {
-    if (props.width !== undefined) scene.width = props.width;
-    if (props.height !== undefined) scene.height = props.height;
-    if (props.backgroundColor !== undefined) scene.backgroundColor = props.backgroundColor;
+    let needsCanvasResize = false;
+    
+    if (props.width !== undefined) {
+      scene.width = props.width;
+      needsCanvasResize = true;
+    }
+    if (props.height !== undefined) {
+      scene.height = props.height;
+      needsCanvasResize = true;
+    }
+    if (props.backgroundColor !== undefined) {
+      scene.backgroundColor = props.backgroundColor;
+    }
+    
+    // Resize canvas if scene dimensions changed
+    if (needsCanvasResize) {
+      this.canvas.width = scene.width;
+      this.canvas.height = scene.height;
+      this.markDirty();
+    }
   }
 
   destroyScene(scene: CanvasScene): void {
@@ -242,7 +265,8 @@ export class CanvasAdapter implements RenderAdapter {
     this.ctx.translate(sprite.x + sprite.width / 2, sprite.y + sprite.height / 2);
     
     if (sprite.rotation !== 0) {
-      this.ctx.rotate(sprite.rotation);
+      // Convert degrees to radians for canvas rotation
+      this.ctx.rotate((sprite.rotation * Math.PI) / 180);
     }
     
     // Draw sprite
