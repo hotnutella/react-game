@@ -6,8 +6,8 @@ import { GameLoopContext } from './components';
 
 export { Game, Scene, Sprite, Animation, GameLoopContext, Easing } from './components';
 export type { GameProps, SceneProps, SpriteProps, AnimationProps, AnimatableProps, EasingFunction, AnimationControls, UpdateCallback } from './components';
-export { useGameLoop, useDeltaTime, useUpdate, useKeyboard } from './hooks';
-export type { KeyboardState } from './hooks';
+export { useGameLoop, useDeltaTime, useUpdate, useKeyboard, useMouse, MouseButtons } from './hooks';
+export type { KeyboardState, MouseState, MousePosition, MouseMovement, DragEvent } from './hooks';
 export { useManifest, withManifestProvider } from './manifest';
 export type { Manifest, ManifestState } from './manifest';
 
@@ -16,7 +16,7 @@ export { CanvasAdapter } from './adapters/CanvasAdapter';
 export type { RenderAdapter } from './adapters';
 
 // Reconciler (for advanced usage)
-export { GameReconciler, setCurrentAdapter } from './reconciler';
+export { GameReconciler, setCurrentAdapter, getCurrentCanvas } from './reconciler';
 export type { GameObject } from './reconciler';
 
 // Shared types

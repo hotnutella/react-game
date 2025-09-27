@@ -55,6 +55,13 @@ export function setCurrentAdapter(adapter: RenderAdapter) {
   currentAdapter = adapter;
 }
 
+export function getCurrentCanvas(): HTMLCanvasElement | null {
+  if (currentAdapter && 'getCanvas' in currentAdapter) {
+    return (currentAdapter as any).getCanvas();
+  }
+  return null;
+}
+
 // Create reconciler configuration
 const hostConfig: Reconciler.HostConfig<
   string, // Type

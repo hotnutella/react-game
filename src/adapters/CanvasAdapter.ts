@@ -49,6 +49,10 @@ export class CanvasAdapter implements RenderAdapter {
     this.textureCache.clear();
   }
 
+  getCanvas(): HTMLCanvasElement {
+    return this.canvas;
+  }
+
   beginFrame(): void {
     // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

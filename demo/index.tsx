@@ -6,7 +6,7 @@ import {
   useUiManifest,
   type MyManifestAssets,
 } from "./manifests/manifestTypes";
-import { render, useKeyboard } from "../src/index";
+import { render, useKeyboard, useMouse, MouseButtons } from "../src/index";
 
 // Keyboard-controlled sprite example
 function KeyboardControlledSprite() {
@@ -144,6 +144,292 @@ function KeyboardControlledSprite() {
         height={8}
         alpha={releasedKeys.includes(" ") ? 1 : 0.5}
       />
+    </>
+  );
+}
+
+// Mouse logger component to demonstrate useMouse hook
+function MouseLogger() {
+  const {
+    position,
+    movement,
+    pressedButtons,
+    releasedButtons,
+    doubleClick,
+    isDragging,
+    dragStart,
+    dragEnd,
+    currentDrag,
+  } = useMouse();
+  const [lastLogTime, setLastLogTime] = useState(0);
+
+  // Initial message
+  useEffect(() => {
+    console.log(
+      "🖱️ Mouse logging is active! Move your mouse over the CANVAS and click buttons to see the hook outputs in the console."
+    );
+    console.log(
+      "📊 Legend: 🖱️ = position (canvas-relative), 🏃 = movement, 🔴 = pressed buttons, ⚪ = released buttons, 🔥 = double-click, 🎯 = drag events"
+    );
+    console.log(
+      "🎯 Note: Mouse events are now captured only within the canvas area and coordinates are relative to the canvas (0,0 = top-left corner of canvas)."
+    );
+    console.log(
+      "🚫 Context menu (right-click menu) is disabled on the canvas for better game experience."
+    );
+  }, []);
+
+  // Log mouse position periodically (every 100ms to avoid spam)
+  useEffect(() => {
+    const now = Date.now();
+    if (now - lastLogTime > 100) {
+      console.log(`🖱️  Mouse position: (${position.x}, ${position.y})`);
+      setLastLogTime(now);
+    }
+  }, [position, lastLogTime]);
+
+  // Log mouse movement when it occurs
+  useEffect(() => {
+    if (movement) {
+      console.log(
+        `🏃 Mouse movement: from (${movement.from.x}, ${movement.from.y}) to (${movement.to.x}, ${movement.to.y}) delta (${movement.delta.x}, ${movement.delta.y})`
+      );
+    }
+  }, [movement]);
+
+  // Log pressed buttons
+  useEffect(() => {
+    if (pressedButtons.length > 0) {
+      const buttonNames = pressedButtons.map((btn) => {
+        switch (btn) {
+          case MouseButtons.LEFT:
+            return "LEFT";
+          case MouseButtons.RIGHT:
+            return "RIGHT";
+          case MouseButtons.MIDDLE:
+            return "MIDDLE";
+          case MouseButtons.BACK:
+            return "BACK";
+          case MouseButtons.FORWARD:
+            return "FORWARD";
+          default:
+            return `BUTTON_${btn}`;
+        }
+      });
+      console.log(`🔴 Mouse buttons pressed: [${buttonNames.join(", ")}]`);
+    }
+  }, [pressedButtons]);
+
+  // Log released buttons
+  useEffect(() => {
+    if (releasedButtons.length > 0) {
+      const buttonNames = releasedButtons.map((btn) => {
+        switch (btn) {
+          case MouseButtons.LEFT:
+            return "LEFT";
+          case MouseButtons.RIGHT:
+            return "RIGHT";
+          case MouseButtons.MIDDLE:
+            return "MIDDLE";
+          case MouseButtons.BACK:
+            return "BACK";
+          case MouseButtons.FORWARD:
+            return "FORWARD";
+          default:
+            return `BUTTON_${btn}`;
+        }
+      });
+      console.log(`⚪ Mouse buttons released: [${buttonNames.join(", ")}]`);
+    }
+  }, [releasedButtons]);
+
+  // Log double-click events
+  useEffect(() => {
+    if (doubleClick) {
+      const buttonName = (() => {
+        switch (doubleClick.button) {
+          case MouseButtons.LEFT:
+            return "LEFT";
+          case MouseButtons.RIGHT:
+            return "RIGHT";
+          case MouseButtons.MIDDLE:
+            return "MIDDLE";
+          case MouseButtons.BACK:
+            return "BACK";
+          case MouseButtons.FORWARD:
+            return "FORWARD";
+          default:
+            return `BUTTON_${doubleClick.button}`;
+        }
+      })();
+      console.log(
+        `🔥 Double-click detected: ${buttonName} at (${doubleClick.position.x}, ${doubleClick.position.y})`
+      );
+    }
+  }, [doubleClick]);
+
+  // Log drag start events
+  useEffect(() => {
+    if (dragStart) {
+      const buttonName = (() => {
+        switch (dragStart.button) {
+          case MouseButtons.LEFT:
+            return "LEFT";
+          case MouseButtons.RIGHT:
+            return "RIGHT";
+          case MouseButtons.MIDDLE:
+            return "MIDDLE";
+          case MouseButtons.BACK:
+            return "BACK";
+          case MouseButtons.FORWARD:
+            return "FORWARD";
+          default:
+            return `BUTTON_${dragStart.button}`;
+        }
+      })();
+      console.log(
+        `🎯 Drag started: ${buttonName} from (${dragStart.startPosition.x}, ${dragStart.startPosition.y}) to (${dragStart.currentPosition.x}, ${dragStart.currentPosition.y})`
+      );
+    }
+  }, [dragStart]);
+
+  // Log drag end events
+  useEffect(() => {
+    if (dragEnd) {
+      const buttonName = (() => {
+        switch (dragEnd.button) {
+          case MouseButtons.LEFT:
+            return "LEFT";
+          case MouseButtons.RIGHT:
+            return "RIGHT";
+          case MouseButtons.MIDDLE:
+            return "MIDDLE";
+          case MouseButtons.BACK:
+            return "BACK";
+          case MouseButtons.FORWARD:
+            return "FORWARD";
+          default:
+            return `BUTTON_${dragEnd.button}`;
+        }
+      })();
+      console.log(
+        `🎯 Drag ended: ${buttonName} from (${dragEnd.startPosition.x}, ${dragEnd.startPosition.y}) to (${dragEnd.currentPosition.x}, ${dragEnd.currentPosition.y}) delta (${dragEnd.delta.x}, ${dragEnd.delta.y})`
+      );
+    }
+  }, [dragEnd]);
+
+  // Log drag state changes
+  useEffect(() => {
+    if (isDragging) {
+      console.log("🎯 Dragging state: ACTIVE");
+    }
+  }, [isDragging]);
+
+  // Visual indicator sprite that follows the mouse cursor
+  return (
+    <>
+      {/* Mouse cursor indicator - small sprite that follows mouse */}
+      <Sprite
+        x={position.x - 5}
+        y={position.y - 5}
+        width={10}
+        height={10}
+        alpha={isDragging ? 1 : 0.7}
+      />
+
+      {/* Drag state indicator - larger circle when dragging */}
+      {isDragging && (
+        <Sprite
+          x={position.x - 8}
+          y={position.y - 8}
+          width={16}
+          height={16}
+          alpha={0.3}
+        />
+      )}
+
+      {/* Double-click indicator - brief flash */}
+      {doubleClick && (
+        <Sprite
+          x={doubleClick.position.x - 10}
+          y={doubleClick.position.y - 10}
+          width={20}
+          height={20}
+          alpha={0.8}
+        />
+      )}
+
+      {/* Drag line from start to current position */}
+      {currentDrag && (
+        <>
+          {/* Start position indicator */}
+          <Sprite
+            x={currentDrag.startPosition.x - 3}
+            y={currentDrag.startPosition.y - 3}
+            width={6}
+            height={6}
+            alpha={0.8}
+          />
+          {/* Current position line effect - multiple small sprites */}
+          {Array.from({ length: 5 }, (_, i) => {
+            const ratio = (i + 1) / 6;
+            const x = currentDrag.startPosition.x + currentDrag.delta.x * ratio;
+            const y = currentDrag.startPosition.y + currentDrag.delta.y * ratio;
+            return (
+              <Sprite
+                key={i}
+                x={x - 1}
+                y={y - 1}
+                width={2}
+                height={2}
+                alpha={0.6 - i * 0.1}
+              />
+            );
+          })}
+        </>
+      )}
+
+      {/* Visual indicators for pressed buttons */}
+      {pressedButtons.includes(MouseButtons.LEFT) && (
+        <Sprite
+          x={position.x - 15}
+          y={position.y - 15}
+          width={6}
+          height={6}
+          alpha={1}
+        />
+      )}
+
+      {pressedButtons.includes(MouseButtons.RIGHT) && (
+        <Sprite
+          x={position.x + 15}
+          y={position.y - 15}
+          width={6}
+          height={6}
+          alpha={1}
+        />
+      )}
+
+      {pressedButtons.includes(MouseButtons.MIDDLE) && (
+        <Sprite
+          x={position.x}
+          y={position.y - 20}
+          width={6}
+          height={6}
+          alpha={1}
+        />
+      )}
+
+      {/* Movement trail effect - show last movement direction */}
+      {movement && (
+        <Sprite
+          x={movement.from.x - 2}
+          y={movement.from.y - 2}
+          width={4}
+          height={4}
+          alpha={0.4}
+        />
+      )}
     </>
   );
 }
@@ -376,6 +662,7 @@ function GameContent() {
       <AnimatedSprites assets={assets} />
       <ControlledAnimation />
       <KeyboardControlledSprite />
+      <MouseLogger />
       {/* Static sprites for reference */}
       <Sprite x={600} y={500} width={30} height={30} />
       <Sprite x={700} y={500} width={40} height={40} />
