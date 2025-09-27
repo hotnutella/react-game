@@ -225,15 +225,26 @@ interface RenderAdapter {
 
 ## License
 
-MIT
+This project is licensed under the Business Source License 1.1 (BUSL-1.1).
 
-## Contributing
+You may use ReactGame to build games and applications, including for commercial use.  
+However, using it to create a competing game development framework, service, or platform is **not permitted**  
+without purchasing a commercial license.
 
-Contributions welcome! This is a minimal implementation focused on proving the concept. Future enhancements could include:
+Please see [LICENSE](./LICENSE) for full details.
 
-- Physics integration
-- Audio system
-- Input handling
-- Asset management
-- Advanced rendering features
-- More rendering adapters (Three.js, PixiJS)
+**Key Details:**
+
+- **Licensor:** Hanows OÜ (maintained by Deniss Suhhanov)
+- **Licensed Work:** The ReactGame Game Development Framework
+- **Change Date:** September 27, 2032
+- **Change License:** Apache-2.0
+
+**Summary:**
+
+- ✅ **Free for non-commercial and limited commercial use** — development, testing, internal projects, and commercial games are allowed
+- 🚫 **Not allowed:** using ReactGame as the basis of a competing game framework, editor, SaaS, or dev tool
+- 🔄 **License change:** After September 27, 2032, this project will be re-licensed under Apache-2.0
+- 💼 **Commercial licensing** — Will be available closer to v1.0. For now, please respect the terms of the Additional Use Grant.
+
+For full legal terms, please refer to the [LICENSE](./LICENSE) file.

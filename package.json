@@ -22,7 +22,7 @@
   },
   "keywords": ["react", "game", "renderer", "canvas", "webgl"],
   "author": "ReactGame Team",
-  "license": "MIT",
+  "license": "BUSL-1.1",
   "peerDependencies": {
     "react": "^18.0.0"
   },
