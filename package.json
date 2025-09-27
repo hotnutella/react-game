@@ -20,8 +20,8 @@
     "link:local": "npm run build && npm link",
     "clean": "rm -rf dist dist-demo"
   },
-  "keywords": ["react", "game", "renderer", "canvas", "webgl"],
-  "author": "ReactGame Team",
+  "keywords": ["react", "game", "renderer", "canvas", "webgl", "game-development", "game-engine"],
+  "author": "Hanows OÜ (maintained by Deniss Suhhanov)",
   "license": "BUSL-1.1",
   "peerDependencies": {
     "react": "^18.0.0"

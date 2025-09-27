@@ -1,44 +1,71 @@
 # ReactGame
 
-A React renderer for game development - "React Native for games". ReactGame allows you to build games using familiar React patterns and JSX, but instead of rendering to the DOM, it renders to Canvas/WebGL.
+**React Native for games** - Build games using React components that render directly to Canvas instead of DOM.
 
-## Features
+## What is ReactGame?
 
-- 🎮 **React-powered game development** - Use React components to control game objects
-- 🔄 **Custom reconciler** - Built with `react-reconciler` for efficient updates
-- 🎨 **Pluggable rendering** - Adapter pattern allows switching rendering engines
-- 🎯 **Game loop integration** - Built-in game loop with React hooks
-- 📦 **TypeScript support** - Fully typed for better development experience
+ReactGame is a custom React renderer that lets you build games using familiar React patterns (JSX, hooks, state) but renders to Canvas/WebGL instead of the DOM. Think React Native, but for games.
 
-## Quick Start
+```jsx
+import { render, Scene, Sprite, useGameLoop } from "react-game";
+
+function Game() {
+  const [x, setX] = useState(0);
+
+  useGameLoop((deltaTime) => {
+    setX((x) => x + 100 * deltaTime); // Move 100 pixels/second
+  });
+
+  return (
+    <Scene backgroundColor="#001122">
+      <Sprite x={x} y={100} width={32} height={32} />
+    </Scene>
+  );
+}
+
+// Render to canvas - no React DOM needed!
+const canvas = document.createElement("canvas");
+render(<Game />, canvas);
+```
+
+## Getting Started
+
+### 1. Install
 
 ```bash
 npm install react-game
 ```
 
+### 2. Create your first game
+
 ```jsx
 import { useState } from "react";
-import { render, Scene, Sprite, useGameLoop } from "react-game";
+import { render, Scene, Sprite, Animation, Easing } from "react-game";
 
 function MovingSprite() {
-  const [x, setX] = useState(100);
-
-  useGameLoop((deltaTime) => {
-    setX((x) => x + 50 * deltaTime); // Move 50 pixels per second
-  });
-
-  return <Sprite x={x} y={100} width={32} height={32} />;
+  return (
+    <Animation
+      from={{ x: 50, y: 100 }}
+      to={{ x: 400, y: 100 }}
+      duration={2}
+      loop={true}
+      reverse={true}
+      easing={Easing.easeInOutQuad}
+    >
+      <Sprite width={40} height={40} />
+    </Animation>
+  );
 }
 
 function App() {
   return (
-    <Scene backgroundColor="#001122">
+    <Scene backgroundColor="#001122" width={800} height={600}>
       <MovingSprite />
     </Scene>
   );
 }
 
-// Pure ReactGame - no React DOM needed!
+// Mount to canvas
 const canvas = document.createElement("canvas");
 canvas.width = 800;
 canvas.height = 600;
@@ -47,181 +74,60 @@ document.body.appendChild(canvas);
 render(<App />, canvas);
 ```
 
-## 🎯 Asset Management with Manifests
-
-ReactGame includes built-in asset management with TypeScript support:
+### 3. Try the demo
 
 ```bash
-# Initialize manifest system
-npx react-game init-manifests src/manifests
-
-# Watch and auto-regenerate types
-npx react-game watch-manifests src/manifests
-```
-
-```tsx
-// Auto-generated typed hooks
-import { useGameManifest } from "./src/manifests/manifestTypes";
-
-function Player() {
-  const { assets } = useGameManifest(); // Perfect TypeScript support!
-  return <Sprite texture={assets.hero} x={100} y={100} />;
-}
-```
-
-See [MANIFEST_GUIDE.md](./MANIFEST_GUIDE.md) for complete documentation.
-
-## Core Components
-
-### `<Game>`
-
-The root component that creates the canvas and manages the game loop.
-
-```jsx
-<Game width={800} height={600}>
-  {/* Your game content */}
-</Game>
-```
-
-### `<Scene>`
-
-Container for game objects with scene-level properties.
-
-```jsx
-<Scene backgroundColor="#001122" width={800} height={600}>
-  {/* Sprites and other game objects */}
-</Scene>
-```
-
-### `<Sprite>`
-
-Renderable game object with position, size, and visual properties.
-
-```jsx
-<Sprite
-  x={100}
-  y={100}
-  width={32}
-  height={32}
-  texture="path/to/image.png"
-  rotation={Math.PI / 4}
-  alpha={0.8}
-  visible={true}
-/>
-```
-
-## Hooks
-
-### `useGameLoop(callback)`
-
-Execute code every frame with delta time.
-
-```jsx
-useGameLoop((deltaTime) => {
-  // Update logic here
-  setPosition((pos) => ({ x: pos.x + speed * deltaTime, y: pos.y }));
-});
-```
-
-### `useDeltaTime()`
-
-Get the current frame's delta time.
-
-```jsx
-const deltaTime = useDeltaTime();
-```
-
-### `useUpdate(callback)`
-
-Alias for `useGameLoop` - more semantic for component updates.
-
-## Architecture
-
-ReactGame is a **pure custom React renderer** - no React DOM required!
-
-1. **Custom Reconciler**: Manages `<Scene>` and `<Sprite>` components directly
-2. **Canvas Rendering**: All components render to Canvas/WebGL instead of DOM
-3. **Pure React**: Use React patterns (JSX, hooks, state) without DOM overhead
-4. **Game Loop Integration**: Built-in game loop with `useGameLoop` hook
-
-This means:
-
-- ✅ **No React DOM dependency** - truly independent renderer
-- ✅ **Pure React patterns** - JSX, hooks, state, props
-- ✅ **Direct Canvas rendering** - maximum performance
-- ✅ **Game-optimized** - 60fps game loop built-in
-
-### Usage Patterns
-
-**Pure ReactGame (recommended):**
-
-```jsx
-import { render, Scene, Sprite } from "react-game";
-render(
-  <Scene>
-    <Sprite x={100} y={100} />
-  </Scene>,
-  canvas
-);
-```
-
-**In existing React apps:**
-
-```jsx
-import { Game, Scene, Sprite } from "react-game";
-// Game component bridges to existing React DOM apps
-<Game width={800} height={600}>
-  <Scene>
-    <Sprite x={100} y={100} />
-  </Scene>
-</Game>;
-```
-
-The adapter pattern allows you to swap rendering engines:
-
-- `CanvasAdapter` - 2D Canvas rendering (included)
-- Custom adapters for Three.js, PixiJS, or other engines
-
-## Development
-
-```bash
-# Install dependencies
+git clone https://github.com/hotnutella/react-game
+cd react-game
 npm install
-
-# Build the library
-npm run build
-
-# Run the demo
 npm run demo
 ```
 
-## Demo
+## Core Features
 
-The demo showcases:
+- **🎮 Pure React for games** - Use JSX, hooks, and state to build games
+- **🚀 No DOM overhead** - Direct Canvas rendering for 60fps performance
+- **🎨 Built-in animations** - Smooth animations with easing functions
+- **📦 TypeScript support** - Fully typed API with asset management
+- **🔧 Extensible** - Pluggable rendering adapters (Canvas, WebGL, etc.)
 
-- Moving sprite with collision detection
-- Rotating sprite animation
-- Pulsing sprite with scale changes
-- Multiple sprites in a scene
+## Key Components
 
-## Rendering Adapters
+| Component     | Purpose                                         |
+| ------------- | ----------------------------------------------- |
+| `<Scene>`     | Root container with background and dimensions   |
+| `<Sprite>`    | Visual game object with position, size, texture |
+| `<Animation>` | Animate any sprite properties over time         |
 
-### Canvas 2D (Built-in)
+## Essential Hooks
 
-Basic 2D rendering using HTML5 Canvas.
+| Hook                    | Purpose                                     |
+| ----------------------- | ------------------------------------------- |
+| `useGameLoop(callback)` | Execute code every frame with delta time    |
+| `useManifest()`         | Load and manage game assets with TypeScript |
 
-### Custom Adapters
+## Why ReactGame?
 
-Implement the `RenderAdapter` interface to support other engines:
+**Traditional game development:**
 
-```typescript
-interface RenderAdapter {
-  initialize(canvas: HTMLCanvasElement, width: number, height: number): void;
-  createSprite(props: SpriteProps): any;
-  updateSprite(sprite: any, props: SpriteProps): void;
-  // ... other methods
+```javascript
+// Imperative, hard to manage state
+sprite.x += velocity * deltaTime;
+if (sprite.x > boundary) {
+  sprite.visible = false;
 }
 ```
+
+**ReactGame:**
+
+```jsx
+// Declarative, React manages state
+function Bullet({ x, visible }) {
+  return <Sprite x={x} y={50} visible={visible} />;
+}
+```
+
+ReactGame brings React's declarative, component-based architecture to game development, making complex game state management much simpler.
 
 ## License
 
