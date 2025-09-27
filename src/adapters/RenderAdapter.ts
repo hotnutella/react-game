@@ -10,7 +10,7 @@ export interface RenderAdapter {
   clear(color?: string): void;
   
   // Object management
-  createSprite(props: any): any; // Returns engine-specific sprite object - props will be SpriteProps
+  createSprite(props: any, componentInfo?: any): any; // Returns engine-specific sprite object - props will be SpriteProps
   updateSprite(sprite: any, props: any): void;
   destroySprite(sprite: any): void;
   
@@ -24,4 +24,5 @@ export interface RenderAdapter {
   
   // Utility
   loadTexture?(url: string): Promise<any>;
+  hitTest?(x: number, y: number): any; // Returns the topmost sprite at the given coordinates
 }

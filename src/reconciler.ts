@@ -51,6 +51,9 @@ type NoTimeout = -1;
 // Global adapter reference - will be set by the Game component
 let currentAdapter: RenderAdapter | null = null;
 
+// Component ID counter for unique identification
+let componentIdCounter = 0;
+
 export function setCurrentAdapter(adapter: RenderAdapter) {
   currentAdapter = adapter;
 }
@@ -58,6 +61,13 @@ export function setCurrentAdapter(adapter: RenderAdapter) {
 export function getCurrentCanvas(): HTMLCanvasElement | null {
   if (currentAdapter && 'getCanvas' in currentAdapter) {
     return (currentAdapter as any).getCanvas();
+  }
+  return null;
+}
+
+export function getComponentAtPosition(x: number, y: number): any | null {
+  if (currentAdapter && 'hitTest' in currentAdapter) {
+    return (currentAdapter as any).hitTest(x, y);
   }
   return null;
 }
@@ -119,11 +129,19 @@ const hostConfig: Reconciler.HostConfig<
     switch (type) {
       case 'sprite': {
         console.log('Creating sprite with props:', props);
+        
+        // Create unique component info
+        const componentInfo = {
+          type: 'sprite',
+          id: `sprite-${++componentIdCounter}`,
+          props: { ...props }
+        };
+        
         const sprite: SpriteInstance = {
           type: 'sprite',
           props: props as SpriteProps,
           children: [],
-          nativeObject: currentAdapter.createSprite(props as SpriteProps),
+          nativeObject: currentAdapter.createSprite(props as SpriteProps, componentInfo),
         };
         return sprite;
       }

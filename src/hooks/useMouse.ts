@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useGameLoop } from "./useGameLoop";
-import { getCurrentCanvas } from "../reconciler";
+import { getCurrentCanvas, getComponentAtPosition } from "../reconciler";
 
 // Interface for mouse position coordinates
 export interface MousePosition {
@@ -34,6 +34,7 @@ export interface MouseState {
   dragStart: DragEvent | null;
   dragEnd: DragEvent | null;
   currentDrag: DragEvent | null;
+  componentUnderPointer: any | null; // The ReactGame component under the mouse pointer
 }
 
 // Mouse button constants for easier reference
@@ -56,6 +57,7 @@ export function useMouse(): MouseState {
   const [dragStart, setDragStart] = useState<DragEvent | null>(null);
   const [dragEnd, setDragEnd] = useState<DragEvent | null>(null);
   const [currentDrag, setCurrentDrag] = useState<DragEvent | null>(null);
+  const [componentUnderPointer, setComponentUnderPointer] = useState<any | null>(null);
   
   const previousPositionRef = useRef<MousePosition>({ x: 0, y: 0 });
   const releasedButtonsRef = useRef<number[]>([]);
@@ -193,6 +195,31 @@ export function useMouse(): MouseState {
       
       setPosition(newPosition);
       previousPositionRef.current = newPosition;
+      
+      // Update component under pointer
+      const component = getComponentAtPosition(newPosition.x, newPosition.y);
+      
+      // Only update state if component actually changed to prevent unnecessary re-renders
+      setComponentUnderPointer((prevComponent: any) => {
+        
+        // Handle null cases (background)
+        if (!component && !prevComponent) {
+          return prevComponent; // Stay null, no change
+        }
+        if (!component && prevComponent) {
+          return null; // Changed from component to background
+        }
+        if (component && !prevComponent) {
+          return component; // Changed from background to component
+        }
+        
+        // Both exist, compare IDs
+        if (component && prevComponent && component.id === prevComponent.id) {
+          return prevComponent; // Same component, no change
+        }
+        
+        return component; // Different component
+      });
     };
 
     const handleMouseDown = (event: MouseEvent) => {
@@ -366,5 +393,6 @@ export function useMouse(): MouseState {
     dragStart,
     dragEnd,
     currentDrag,
+    componentUnderPointer,
   };
 }

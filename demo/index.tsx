@@ -148,6 +148,23 @@ function KeyboardControlledSprite() {
   );
 }
 
+// Simple mouse logger for debugging - no visual sprites
+function SimpleMouseLogger() {
+  const { componentUnderPointer } = useMouse();
+
+  useEffect(() => {
+    if (componentUnderPointer) {
+      console.log(
+        `🎨 Component under pointer: ${componentUnderPointer.type} ${componentUnderPointer.id}`
+      );
+    } else {
+      console.log("🎨 Component under pointer: None (background)");
+    }
+  }, [componentUnderPointer]);
+
+  return null; // No visual output
+}
+
 // Mouse logger component to demonstrate useMouse hook
 function MouseLogger() {
   const {
@@ -160,8 +177,9 @@ function MouseLogger() {
     dragStart,
     dragEnd,
     currentDrag,
+    componentUnderPointer,
   } = useMouse();
-  const [lastLogTime, setLastLogTime] = useState(0);
+  const lastLogTimeRef = useRef(0);
 
   // Initial message
   useEffect(() => {
@@ -169,7 +187,7 @@ function MouseLogger() {
       "🖱️ Mouse logging is active! Move your mouse over the CANVAS and click buttons to see the hook outputs in the console."
     );
     console.log(
-      "📊 Legend: 🖱️ = position (canvas-relative), 🏃 = movement, 🔴 = pressed buttons, ⚪ = released buttons, 🔥 = double-click, 🎯 = drag events"
+      "📊 Legend: 🖱️ = position (canvas-relative), 🏃 = movement, 🔴 = pressed buttons, ⚪ = released buttons, 🔥 = double-click, 🎯 = drag events, 🎨 = component under pointer"
     );
     console.log(
       "🎯 Note: Mouse events are now captured only within the canvas area and coordinates are relative to the canvas (0,0 = top-left corner of canvas)."
@@ -182,11 +200,11 @@ function MouseLogger() {
   // Log mouse position periodically (every 100ms to avoid spam)
   useEffect(() => {
     const now = Date.now();
-    if (now - lastLogTime > 100) {
+    if (now - lastLogTimeRef.current > 100) {
       console.log(`🖱️  Mouse position: (${position.x}, ${position.y})`);
-      setLastLogTime(now);
+      lastLogTimeRef.current = now;
     }
-  }, [position, lastLogTime]);
+  }, [position]);
 
   // Log mouse movement when it occurs
   useEffect(() => {
@@ -325,113 +343,23 @@ function MouseLogger() {
     }
   }, [isDragging]);
 
-  // Visual indicator sprite that follows the mouse cursor
-  return (
-    <>
-      {/* Mouse cursor indicator - small sprite that follows mouse */}
-      <Sprite
-        x={position.x - 5}
-        y={position.y - 5}
-        width={10}
-        height={10}
-        alpha={isDragging ? 1 : 0.7}
-      />
+  // Log component under pointer changes
+  useEffect(() => {
+    if (componentUnderPointer) {
+      const { type, id, props } = componentUnderPointer;
+      const position = props ? `(${props.x || 0}, ${props.y || 0})` : "";
+      const texture = props?.texture ? ` texture="${props.texture}"` : "";
+      console.log(
+        `🎨 Component under pointer: ${type} ${id} at ${position}${texture}`
+      );
+    } else {
+      console.log("🎨 Component under pointer: None (background)");
+    }
+  }, [componentUnderPointer]);
 
-      {/* Drag state indicator - larger circle when dragging */}
-      {isDragging && (
-        <Sprite
-          x={position.x - 8}
-          y={position.y - 8}
-          width={16}
-          height={16}
-          alpha={0.3}
-        />
-      )}
-
-      {/* Double-click indicator - brief flash */}
-      {doubleClick && (
-        <Sprite
-          x={doubleClick.position.x - 10}
-          y={doubleClick.position.y - 10}
-          width={20}
-          height={20}
-          alpha={0.8}
-        />
-      )}
-
-      {/* Drag line from start to current position */}
-      {currentDrag && (
-        <>
-          {/* Start position indicator */}
-          <Sprite
-            x={currentDrag.startPosition.x - 3}
-            y={currentDrag.startPosition.y - 3}
-            width={6}
-            height={6}
-            alpha={0.8}
-          />
-          {/* Current position line effect - multiple small sprites */}
-          {Array.from({ length: 5 }, (_, i) => {
-            const ratio = (i + 1) / 6;
-            const x = currentDrag.startPosition.x + currentDrag.delta.x * ratio;
-            const y = currentDrag.startPosition.y + currentDrag.delta.y * ratio;
-            return (
-              <Sprite
-                key={i}
-                x={x - 1}
-                y={y - 1}
-                width={2}
-                height={2}
-                alpha={0.6 - i * 0.1}
-              />
-            );
-          })}
-        </>
-      )}
-
-      {/* Visual indicators for pressed buttons */}
-      {pressedButtons.includes(MouseButtons.LEFT) && (
-        <Sprite
-          x={position.x - 15}
-          y={position.y - 15}
-          width={6}
-          height={6}
-          alpha={1}
-        />
-      )}
-
-      {pressedButtons.includes(MouseButtons.RIGHT) && (
-        <Sprite
-          x={position.x + 15}
-          y={position.y - 15}
-          width={6}
-          height={6}
-          alpha={1}
-        />
-      )}
-
-      {pressedButtons.includes(MouseButtons.MIDDLE) && (
-        <Sprite
-          x={position.x}
-          y={position.y - 20}
-          width={6}
-          height={6}
-          alpha={1}
-        />
-      )}
-
-      {/* Movement trail effect - show last movement direction */}
-      {movement && (
-        <Sprite
-          x={movement.from.x - 2}
-          y={movement.from.y - 2}
-          width={4}
-          height={4}
-          alpha={0.4}
-        />
-      )}
-    </>
-  );
+  // TEMPORARILY DISABLED: Visual indicators cause sprite recreation
+  // Only console logging enabled to debug the issue
+  return null;
 }
 
 // Controlled Animation example with visual feedback
@@ -439,6 +367,7 @@ function ControlledAnimation() {
   const animationRef = useRef<AnimationControls>(null);
   const [animationState, setAnimationState] = useState("stopped");
   const [progress, setProgress] = useState(0);
+  const progressRef = useRef(0);
 
   // Demonstrate full control cycle
   useEffect(() => {
@@ -503,13 +432,14 @@ function ControlledAnimation() {
           setAnimationState("completed");
         }}
         onUpdate={(currentProgress, values) => {
-          setProgress(currentProgress);
+          progressRef.current = currentProgress;
 
-          // Log progress every 10%
-          if (
-            Math.floor(currentProgress * 10) !==
-            Math.floor((currentProgress - 0.01) * 10)
-          ) {
+          // Only update state for significant progress changes (every 10%)
+          const progressPercent = Math.floor(currentProgress * 10);
+          const lastProgressPercent = Math.floor(progress * 10);
+
+          if (progressPercent !== lastProgressPercent) {
+            setProgress(currentProgress);
             console.log(
               `📊 Animation progress: ${Math.round(currentProgress * 100)}%`
             );
@@ -646,15 +576,21 @@ function UIElements() {
 function GameContent() {
   const { assets, loading, error, progress } = useMyManifest();
 
-  if (error) {
-    console.error("Failed to load manifest:", error);
-  }
+  // Handle error logging in useEffect to avoid re-renders
+  useEffect(() => {
+    if (error) {
+      console.error("Failed to load manifest:", error);
+    }
+  }, [error]);
 
-  if (loading) {
-    console.log(
-      `Loading assets: ${progress.loaded}/${progress.total} (${progress.percentage}%)`
-    );
-  }
+  // Handle loading progress logging in useEffect to avoid re-renders
+  useEffect(() => {
+    if (loading) {
+      console.log(
+        `Loading assets: ${progress.loaded}/${progress.total} (${progress.percentage}%)`
+      );
+    }
+  }, [loading, progress.loaded, progress.total, progress.percentage]);
 
   return (
     <>

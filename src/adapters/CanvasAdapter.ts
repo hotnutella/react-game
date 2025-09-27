@@ -2,6 +2,12 @@ import type { RenderAdapter } from './RenderAdapter';
 import type { SpriteProps } from '../components/Sprite';
 import type { SceneProps } from '../components/Scene';
 
+interface ComponentInfo {
+  type: string;
+  id: string;
+  props: any;
+}
+
 interface CanvasSprite {
   x: number;
   y: number;
@@ -12,6 +18,8 @@ interface CanvasSprite {
   alpha: number;
   visible: boolean;
   image?: HTMLImageElement;
+  // For hit testing - information about the React component
+  componentInfo?: ComponentInfo;
 }
 
 interface CanvasScene {
@@ -71,7 +79,7 @@ export class CanvasAdapter implements RenderAdapter {
     }
   }
 
-  createSprite(props: SpriteProps): CanvasSprite {
+  createSprite(props: SpriteProps, componentInfo?: ComponentInfo): CanvasSprite {
     const sprite: CanvasSprite = {
       x: props.x || 0,
       y: props.y || 0,
@@ -81,6 +89,7 @@ export class CanvasAdapter implements RenderAdapter {
       rotation: props.rotation || 0,
       alpha: props.alpha !== undefined ? props.alpha : 1,
       visible: props.visible !== undefined ? props.visible : true,
+      componentInfo: componentInfo,
     };
 
     // Load texture if provided
@@ -224,6 +233,33 @@ export class CanvasAdapter implements RenderAdapter {
       };
       image.src = url;
     });
+  }
+
+  // Hit testing - find sprite at given canvas coordinates
+  hitTest(x: number, y: number): ComponentInfo | null {
+    if (!this.scene) {
+      return null;
+    }
+
+    // Test sprites in reverse order (last rendered = on top)
+    for (let i = this.scene.children.length - 1; i >= 0; i--) {
+      const sprite = this.scene.children[i];
+      
+      // Skip invisible sprites
+      if (!sprite.visible || sprite.alpha <= 0) {
+        continue;
+      }
+
+      // Simple rectangular hit test
+      if (x >= sprite.x && 
+          x <= sprite.x + sprite.width &&
+          y >= sprite.y && 
+          y <= sprite.y + sprite.height) {
+        return sprite.componentInfo || null;
+      }
+    }
+
+    return null;
   }
 
   // Render the current scene

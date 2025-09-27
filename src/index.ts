@@ -16,7 +16,7 @@ export { CanvasAdapter } from './adapters/CanvasAdapter';
 export type { RenderAdapter } from './adapters';
 
 // Reconciler (for advanced usage)
-export { GameReconciler, setCurrentAdapter, getCurrentCanvas } from './reconciler';
+export { GameReconciler, setCurrentAdapter, getCurrentCanvas, getComponentAtPosition } from './reconciler';
 export type { GameObject } from './reconciler';
 
 // Shared types
