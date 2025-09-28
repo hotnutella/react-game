@@ -4,7 +4,7 @@ import type { MousePosition, DragEvent } from "../../src/hooks";
 
 // Interactive Demo Component - Shows how to use the Interactive wrapper
 export function InteractiveDemo() {
-  const [spritePosition, setSpritePosition] = useState({ x: 100, y: 100 });
+  const [spritePosition, setSpritePosition] = useState({ x: 100, y: 400 });
   const [interactiveAlpha, setInteractiveAlpha] = useState(0.3);
 
   const handleLeftClick = useCallback((position: MousePosition) => {
@@ -90,60 +90,27 @@ export function InteractiveDemo() {
   );
 
   return (
-    <>
-      {/* Interactive Sprite that responds to mouse events */}
-      <Interactive
-        onLeftClick={handleLeftClick}
-        onRightClick={handleRightClick}
-        onDoubleClick={handleDoubleClick}
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onButtonPress={handleButtonPress}
-        onButtonRelease={handleButtonRelease}
-        onButtonsChange={handleButtonsChange}
-      >
-        <Sprite
-          x={spritePosition.x}
-          y={spritePosition.y}
-          width={50}
-          height={50}
-          texture="sample.svg"
-          alpha={interactiveAlpha}
-        />
-      </Interactive>
-
-      {/* Status Display Sprites */}
+    <Interactive
+      onLeftClick={handleLeftClick}
+      onRightClick={handleRightClick}
+      onDoubleClick={handleDoubleClick}
+      onDragStart={handleDragStart}
+      onDrag={handleDrag}
+      onDragEnd={handleDragEnd}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onButtonPress={handleButtonPress}
+      onButtonRelease={handleButtonRelease}
+      onButtonsChange={handleButtonsChange}
+    >
       <Sprite
-        x={10}
-        y={10}
-        width={200}
-        height={20}
+        x={spritePosition.x}
+        y={spritePosition.y}
+        width={50}
+        height={50}
         texture="sample.svg"
-        alpha={0.3}
+        alpha={interactiveAlpha}
       />
-
-      {/* Click Counter Display */}
-      <Sprite
-        x={10}
-        y={40}
-        width={150}
-        height={20}
-        texture="sample.svg"
-        alpha={0.3}
-      />
-
-      {/* Instructions */}
-      <Sprite
-        x={10}
-        y={300}
-        width={300}
-        height={100}
-        texture="sample.svg"
-        alpha={0.2}
-      />
-    </>
+    </Interactive>
   );
 }
