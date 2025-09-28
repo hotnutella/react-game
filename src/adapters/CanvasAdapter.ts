@@ -1,6 +1,7 @@
 import type { RenderAdapter } from './RenderAdapter';
 import type { SpriteProps } from '../components/Core/Sprite';
 import type { SceneProps } from '../components/Core/Scene';
+import type { LayerProps } from '../components/Core/Layer';
 
 interface ComponentInfo {
   type: string;
@@ -22,6 +23,14 @@ interface CanvasSprite {
   componentInfo?: ComponentInfo;
 }
 
+interface CanvasLayer {
+  name: string;
+  zIndex: number;
+  visible: boolean;
+  alpha: number;
+  children: (CanvasScene | CanvasSprite)[];
+}
+
 interface CanvasScene {
   width: number;
   height: number;
@@ -32,7 +41,8 @@ interface CanvasScene {
 export class CanvasAdapter implements RenderAdapter {
   private canvas!: HTMLCanvasElement;
   private ctx!: CanvasRenderingContext2D;
-  private scene?: CanvasScene;
+  private layers: CanvasLayer[] = [];
+  private scene?: CanvasScene; // Keep for backward compatibility
   private textureCache = new Map<string, HTMLImageElement>();
   private lastRenderTime = 0;
   private isDirty = true;
@@ -153,7 +163,7 @@ export class CanvasAdapter implements RenderAdapter {
     const scene: CanvasScene = {
       width: props.width || this.canvas.width,
       height: props.height || this.canvas.height,
-      backgroundColor: props.backgroundColor || '#000000',
+      backgroundColor: props.backgroundColor || 'transparent',
       children: [],
     };
     
@@ -196,18 +206,107 @@ export class CanvasAdapter implements RenderAdapter {
     }
   }
 
-  addChild(parent: CanvasScene, child: CanvasSprite): void {
-    if (!parent.children.includes(child)) {
-      parent.children.push(child);
+  createLayer(props: LayerProps): CanvasLayer {
+    const layer: CanvasLayer = {
+      name: props.name,
+      zIndex: props.zIndex ?? 0,
+      visible: props.visible ?? true,
+      alpha: props.alpha ?? 1.0,
+      children: [],
+    };
+    
+    // Insert layer in correct z-index order
+    const insertIndex = this.layers.findIndex(l => l.zIndex > layer.zIndex);
+    if (insertIndex === -1) {
+      this.layers.push(layer);
+    } else {
+      this.layers.splice(insertIndex, 0, layer);
+    }
+    
+    this.markDirty();
+    return layer;
+  }
+
+  updateLayer(layer: CanvasLayer, props: LayerProps): void {
+    let hasChanges = false;
+    
+    if (props.visible !== undefined && layer.visible !== props.visible) {
+      layer.visible = props.visible;
+      hasChanges = true;
+    }
+    if (props.alpha !== undefined && layer.alpha !== props.alpha) {
+      layer.alpha = props.alpha;
+      hasChanges = true;
+    }
+    
+    // Handle z-index changes - need to reorder layers
+    if (props.zIndex !== undefined && layer.zIndex !== props.zIndex) {
+      layer.zIndex = props.zIndex;
+      
+      // Remove and reinsert in correct position
+      const currentIndex = this.layers.indexOf(layer);
+      if (currentIndex !== -1) {
+        this.layers.splice(currentIndex, 1);
+        const insertIndex = this.layers.findIndex(l => l.zIndex > layer.zIndex);
+        if (insertIndex === -1) {
+          this.layers.push(layer);
+        } else {
+          this.layers.splice(insertIndex, 0, layer);
+        }
+      }
+      hasChanges = true;
+    }
+    
+    if (hasChanges) {
       this.markDirty();
     }
   }
 
-  removeChild(parent: CanvasScene, child: CanvasSprite): void {
-    const index = parent.children.indexOf(child);
+  destroyLayer(layer: CanvasLayer): void {
+    const index = this.layers.indexOf(layer);
     if (index !== -1) {
-      parent.children.splice(index, 1);
+      this.layers.splice(index, 1);
       this.markDirty();
+    }
+  }
+
+  addChild(parent: CanvasScene | CanvasLayer, child: CanvasSprite | CanvasScene): void {
+    if (parent.hasOwnProperty('backgroundColor')) {
+      // It's a CanvasScene - can only contain sprites
+      const scene = parent as CanvasScene;
+      const sprite = child as CanvasSprite;
+      if (!scene.children.includes(sprite)) {
+        scene.children.push(sprite);
+        this.markDirty();
+      }
+    } else {
+      // It's a CanvasLayer - can contain both sprites and scenes
+      const layer = parent as CanvasLayer;
+      if (!layer.children.includes(child)) {
+        layer.children.push(child);
+        this.markDirty();
+      }
+    }
+  }
+
+  removeChild(parent: CanvasScene | CanvasLayer, child: CanvasSprite | CanvasScene): void {
+    if (parent.hasOwnProperty('backgroundColor')) {
+      // It's a CanvasScene - can only contain sprites
+      const scene = parent as CanvasScene;
+      const sprite = child as CanvasSprite;
+      const index = scene.children.indexOf(sprite);
+      if (index !== -1) {
+        scene.children.splice(index, 1);
+        this.markDirty();
+      }
+    } else {
+      // It's a CanvasLayer - can contain both sprites and scenes
+      const layer = parent as CanvasLayer;
+      const index = layer.children.indexOf(child);
+      if (index !== -1) {
+        layer.children.splice(index, 1);
+        this.markDirty();
+      }
     }
   }
 
@@ -268,8 +367,15 @@ export class CanvasAdapter implements RenderAdapter {
     
     this.beginFrame();
     
-    if (this.scene) {
-      // Rendering scene with ${this.scene.children.length} sprites
+    if (this.layers.length > 0) {
+      // Render all layers in z-index order (they're already sorted)
+      for (const layer of this.layers) {
+        if (layer.visible && layer.alpha > 0) {
+          this.renderLayer(layer);
+        }
+      }
+    } else if (this.scene) {
+      // Backward compatibility: render scene directly if no layers
       // Clear with background color
       this.clear(this.scene.backgroundColor);
       
@@ -278,7 +384,7 @@ export class CanvasAdapter implements RenderAdapter {
         this.renderSprite(sprite);
       }
     } else {
-      console.log('No scene to render');
+      console.log('No layers or scene to render');
     }
     
     this.endFrame();
@@ -293,6 +399,43 @@ export class CanvasAdapter implements RenderAdapter {
     ).join('|');
     
     return `${this.scene.backgroundColor}:${sprites}`;
+  }
+
+  private renderLayer(layer: CanvasLayer): void {
+    if (!layer.visible || layer.alpha <= 0) return;
+
+    this.ctx.save();
+    
+    // Apply layer-level alpha
+    this.ctx.globalAlpha = layer.alpha;
+    
+    // Render all children in the layer
+    for (const child of layer.children) {
+      if (child.hasOwnProperty('children')) {
+        // It's a scene
+        this.renderScene(child as CanvasScene);
+      } else {
+        // It's a sprite
+        this.renderSprite(child as CanvasSprite);
+      }
+    }
+    
+    this.ctx.restore();
+  }
+
+  private renderScene(scene: CanvasScene): void {
+    // Render scene background color if specified
+    if (scene.backgroundColor && scene.backgroundColor !== 'transparent') {
+      this.ctx.save();
+      this.ctx.fillStyle = scene.backgroundColor;
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.restore();
+    }
+    
+    // Render all sprites in the scene
+    for (const sprite of scene.children) {
+      this.renderSprite(sprite);
+    }
   }
 
   private renderSprite(sprite: CanvasSprite): void {

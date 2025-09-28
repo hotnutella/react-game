@@ -1,11 +1,18 @@
-import { Scene } from "../../src/components";
+import { Game, Layer, Scene } from "../../src/components";
 import { GameContent } from "./GameContent";
+import BackgroundAnimations from "./BackgroundAnimations";
 
-// Minimal Demo Game - Test useGameLoop and Animation functionality with manifest
 export function DemoGame() {
   return (
-    <Scene backgroundColor="#001122">
-      <GameContent />
-    </Scene>
+    <Game width={800} height={600} debug={true}>
+      <Scene>
+        <GameContent />
+      </Scene>
+      <Layer name="background">
+        <Scene backgroundColor="#001122">
+          <BackgroundAnimations />
+        </Scene>
+      </Layer>
+    </Game>
   );
 }

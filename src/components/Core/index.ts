@@ -1,6 +1,8 @@
 // Core game components
 export { Game, GameLoopContext } from "./Game";
 export type { GameProps, UpdateCallback, GameComponentProps } from "./Game";
+export { Layer, DEFAULT_LAYERS } from "./Layer";
+export type { LayerProps, LayerType } from "./Layer";
 export { Scene } from "./Scene";
 export type { SceneProps } from "./Scene";
 export { Sprite } from "./Sprite";

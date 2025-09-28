@@ -14,6 +14,10 @@ export interface RenderAdapter {
   updateSprite(sprite: any, props: any): void;
   destroySprite(sprite: any): void;
   
+  createLayer(props: any): any; // props will be LayerProps
+  updateLayer(layer: any, props: any): void;
+  destroyLayer(layer: any): void;
+  
   createScene(props: any): any; // props will be SceneProps
   updateScene(scene: any, props: any): void;
   destroyScene(scene: any): void;

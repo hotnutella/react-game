@@ -18,7 +18,7 @@ if (container) {
 
   try {
     // Use ReactGame's render function instead of ReactDOM
-    render(<DemoGame />, canvas);
+    render(<DemoGame />, canvas, { debug: true });
     console.log("Render function completed successfully");
   } catch (error) {
     console.error("Error during render:", error);

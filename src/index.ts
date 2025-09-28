@@ -3,9 +3,10 @@ import { GameReconciler, setCurrentAdapter } from './reconciler';
 import { CanvasAdapter } from './adapters/CanvasAdapter';
 import type { UpdateCallback } from './components/Core/Game';
 import { GameLoopContext } from './components';
+import { Layer, DEFAULT_LAYERS, type LayerType, type LayerProps } from './components/Core/Layer';
 
-export { Game, Scene, Sprite, Animation, Interactive, GameLoopContext, Easing } from './components';
-export type { GameProps, SceneProps, SpriteProps, AnimationProps, AnimatableProps, EasingFunction, AnimationControls, UpdateCallback, InteractiveProps, InteractiveEventHandlers } from './components';
+export { Game, Layer, Scene, Sprite, Animation, Interactive, GameLoopContext, Easing, DEFAULT_LAYERS } from './components';
+export type { GameProps, GameComponentProps, LayerProps, LayerType, SceneProps, SpriteProps, AnimationProps, AnimatableProps, EasingFunction, AnimationControls, UpdateCallback, InteractiveProps, InteractiveEventHandlers } from './components';
 export { useGameLoop, useDeltaTime, useUpdate, useKeyboard, useMouse, MouseButtons } from './hooks';
 export type { KeyboardState, MouseState, MousePosition, MouseMovement, DragEvent } from './hooks';
 export { useManifest, withManifestProvider } from './manifest';
@@ -29,8 +30,71 @@ let currentDeltaTime = 0;
 let animationFrame: number | null = null;
 
 
+// Function to auto-create layers if not present
+function createLayersWithChildren(children: React.ReactNode, debug: boolean = false): React.ReactNode {
+  // Check if children already contain Layer components
+  const childrenArray = React.Children.toArray(children);
+  const layerChildren = childrenArray.filter(
+    (child) => React.isValidElement(child) && child.type === Layer
+  );
+  const nonLayerChildren = childrenArray.filter(
+    (child) => !(React.isValidElement(child) && child.type === Layer)
+  );
+
+  // If all children are already in layers, return as-is
+  if (layerChildren.length === childrenArray.length) {
+    return children;
+  }
+
+  // If we have non-layer children, we need to create auto-layers
+  if (nonLayerChildren.length > 0) {
+
+    // Auto-create layers and put non-layer children in gameplay layer
+    const layers: LayerType[] = [
+      "background",
+      "gameplay", 
+      "foreground",
+      "ui",
+    ];
+    if (debug) {
+      layers.push("debug");
+    }
+
+    const autoLayers = layers.map((layerType) => {
+      const defaultConfig = DEFAULT_LAYERS[layerType];
+      
+      const layerProps: LayerProps = {
+        name: layerType,
+        zIndex: defaultConfig.zIndex,
+        visible: (layerType === "debug" ? debug : true) && defaultConfig.visible,
+        alpha: 1.0,
+      };
+
+      // Put non-layer children in gameplay layer
+      const layerChildren = layerType === "gameplay" ? nonLayerChildren : null;
+
+      return React.createElement(
+        Layer,
+        { key: layerType, ...layerProps },
+        layerChildren
+      );
+    });
+
+    // Combine auto-layers with existing layer children
+    return [...layerChildren, ...autoLayers];
+  }
+
+  // If no non-layer children, return existing layer children
+  return layerChildren;
+}
+
 // Pure ReactGame render function - replaces ReactDOM.render
-export function render(element: React.ReactElement, canvas: HTMLCanvasElement) {
+export function render(element: React.ReactElement, canvas: HTMLCanvasElement, options?: { debug?: boolean }) {
+  // Set flag to indicate we're using pure ReactGame render
+  if (typeof window !== 'undefined') {
+    (window as any).__reactGameRender = true;
+  }
+  
   // Initialize adapter
   const adapter = new CanvasAdapter();
   adapter.initialize(canvas, canvas.width, canvas.height);
@@ -51,12 +115,11 @@ export function render(element: React.ReactElement, canvas: HTMLCanvasElement) {
     },
   };
   
-  // Wrap element with context provider
-  const wrappedElement = React.createElement(
-    GameLoopContext.Provider,
-    { value: gameContext },
-    element
-  );
+  // Process children to add layers if needed
+  const processedChildren = createLayersWithChildren(element, options?.debug || false);
+  
+  // Create the game element with context
+  const gameElement = React.createElement("game", { width: canvas.width, height: canvas.height }, processedChildren);
   
   // Create a root game instance to serve as the container
   const rootGameInstance = {
@@ -78,13 +141,21 @@ export function render(element: React.ReactElement, canvas: HTMLCanvasElement) {
     null
   );
   
-  // Start game loop
+  // Always start game loop for pure ReactGame render
+  // The Game component's game loop only works in React DOM mode
   if (!animationFrame) {
     const cleanup = startGameLoop(adapter);
     
     // Store cleanup function for potential future use
     (window as any).__reactGameCleanup = cleanup;
   }
+  
+  // Wrap element with context provider
+  const wrappedElement = React.createElement(
+    GameLoopContext.Provider,
+    { value: gameContext },
+    gameElement
+  );
   
   // Render the element
   console.log('About to render element with reconciler...');

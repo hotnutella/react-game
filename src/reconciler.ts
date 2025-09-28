@@ -3,6 +3,7 @@ import type { RenderAdapter } from './adapters';
 import type { SpriteProps } from './components/Core/Sprite';
 import type { SceneProps } from './components/Core/Scene';
 import type { GameProps } from './components/Core/Game';
+import type { LayerProps } from './components/Core/Layer';
 
 // Game objects that will be managed by the reconciler
 export interface GameObject {
@@ -16,16 +17,24 @@ export interface GameObject {
 interface GameInstance {
   type: 'game';
   props: GameProps;
-  children: (SceneInstance)[];
+  children: (LayerInstance)[];
   canvas?: HTMLCanvasElement;
   adapter: RenderAdapter;
+}
+
+interface LayerInstance {
+  type: 'layer';
+  props: LayerProps;
+  children: (SceneInstance | SpriteInstance)[];
+  parent?: GameInstance;
+  nativeObject?: any; // Engine-specific layer object
 }
 
 interface SceneInstance {
   type: 'scene';
   props: SceneProps;
   children: (SpriteInstance)[];
-  parent?: GameInstance;
+  parent?: LayerInstance;
   nativeObject?: any; // Engine-specific scene object
 }
 
@@ -33,11 +42,11 @@ interface SpriteInstance {
   type: 'sprite';
   props: SpriteProps;
   children: never[];
-  parent?: SceneInstance;
+  parent?: LayerInstance | SceneInstance;
   nativeObject?: any; // Engine-specific sprite object
 }
 
-type Instance = GameInstance | SceneInstance | SpriteInstance;
+type Instance = GameInstance | LayerInstance | SceneInstance | SpriteInstance;
 type TextInstance = never; // We don't support text nodes
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
@@ -145,6 +154,16 @@ const hostConfig: Reconciler.HostConfig<
         };
         return sprite;
       }
+      case 'layer': {
+        console.log('Creating layer with props:', props);
+        const layer: LayerInstance = {
+          type: 'layer',
+          props: props as LayerProps,
+          children: [],
+          nativeObject: (currentAdapter as any).createLayer ? (currentAdapter as any).createLayer(props as LayerProps) : null,
+        };
+        return layer;
+      }
       case 'scene': {
         console.log('Creating scene with props:', props);
         const scene: SceneInstance = {
@@ -176,9 +195,17 @@ const hostConfig: Reconciler.HostConfig<
   },
 
   appendInitialChild(parent: Instance, child: Instance): void {
-    if (parent.type === 'game' && child.type === 'scene') {
+    if (parent.type === 'game' && child.type === 'layer') {
       parent.children.push(child);
       child.parent = parent;
+    } else if (parent.type === 'layer' && (child.type === 'scene' || child.type === 'sprite')) {
+      parent.children.push(child);
+      child.parent = parent;
+      
+      // Add to render adapter if both have native objects
+      if (currentAdapter && parent.nativeObject && child.nativeObject) {
+        currentAdapter.addChild(parent.nativeObject, child.nativeObject);
+      }
     } else if (parent.type === 'scene' && child.type === 'sprite') {
       parent.children.push(child);
       child.parent = parent;
@@ -187,6 +214,8 @@ const hostConfig: Reconciler.HostConfig<
       if (currentAdapter && parent.nativeObject && child.nativeObject) {
         currentAdapter.addChild(parent.nativeObject, child.nativeObject);
       }
+    } else {
+      console.warn(`Invalid parent-child relationship: ${parent.type} -> ${child.type}`);
     }
   },
 
@@ -195,11 +224,22 @@ const hostConfig: Reconciler.HostConfig<
   },
 
   insertBefore(parent: Instance, child: Instance, beforeChild: Instance): void {
-    if (parent.type === 'game' && child.type === 'scene') {
-      const index = parent.children.indexOf(beforeChild as SceneInstance);
+    if (parent.type === 'game' && child.type === 'layer') {
+      const index = parent.children.indexOf(beforeChild as LayerInstance);
       if (index !== -1) {
         parent.children.splice(index, 0, child);
         child.parent = parent;
+      }
+    } else if (parent.type === 'layer' && (child.type === 'scene' || child.type === 'sprite')) {
+      const index = parent.children.indexOf(beforeChild as SceneInstance | SpriteInstance);
+      if (index !== -1) {
+        parent.children.splice(index, 0, child);
+        child.parent = parent;
+        
+        // Add to render adapter if both have native objects
+        if (currentAdapter && parent.nativeObject && child.nativeObject) {
+          currentAdapter.addChild(parent.nativeObject, child.nativeObject);
+        }
       }
     } else if (parent.type === 'scene' && child.type === 'sprite') {
       const index = parent.children.indexOf(beforeChild as SpriteInstance);
@@ -216,11 +256,22 @@ const hostConfig: Reconciler.HostConfig<
   },
 
   removeChild(parent: Instance, child: Instance): void {
-    if (parent.type === 'game' && child.type === 'scene') {
-      const index = parent.children.indexOf(child as SceneInstance);
+    if (parent.type === 'game' && child.type === 'layer') {
+      const index = parent.children.indexOf(child as LayerInstance);
       if (index !== -1) {
         parent.children.splice(index, 1);
-        (child as SceneInstance).parent = undefined;
+        (child as LayerInstance).parent = undefined;
+      }
+    } else if (parent.type === 'layer' && (child.type === 'scene' || child.type === 'sprite')) {
+      const index = parent.children.indexOf(child as SceneInstance | SpriteInstance);
+      if (index !== -1) {
+        parent.children.splice(index, 1);
+        child.parent = undefined;
+        
+        // Remove from render adapter if both have native objects
+        if (currentAdapter && parent.nativeObject && child.nativeObject) {
+          currentAdapter.removeChild(parent.nativeObject, child.nativeObject);
+        }
       }
     } else if (parent.type === 'scene' && child.type === 'sprite') {
       const index = parent.children.indexOf(child as SpriteInstance);
@@ -256,6 +307,8 @@ const hostConfig: Reconciler.HostConfig<
       currentAdapter.updateSprite(instance.nativeObject, nextProps as SpriteProps);
     } else if (instance.type === 'scene' && instance.nativeObject) {
       currentAdapter.updateScene(instance.nativeObject, nextProps as SceneProps);
+    } else if (instance.type === 'layer' && instance.nativeObject && (currentAdapter as any).updateLayer) {
+      (currentAdapter as any).updateLayer(instance.nativeObject, nextProps as LayerProps);
     }
   },
 
@@ -343,7 +396,7 @@ const hostConfig: Reconciler.HostConfig<
       gameInstance = container;
     }
     
-    if (gameInstance && child.type === 'scene') {
+    if (gameInstance && child.type === 'layer') {
       gameInstance.children.push(child);
       child.parent = gameInstance;
     }
@@ -356,8 +409,8 @@ const hostConfig: Reconciler.HostConfig<
       gameInstance = container;
     }
     
-    if (gameInstance && child.type === 'scene') {
-      const index = gameInstance.children.indexOf(beforeChild as SceneInstance);
+    if (gameInstance && child.type === 'layer') {
+      const index = gameInstance.children.indexOf(beforeChild as LayerInstance);
       if (index !== -1) {
         gameInstance.children.splice(index, 0, child);
         child.parent = gameInstance;
@@ -371,11 +424,11 @@ const hostConfig: Reconciler.HostConfig<
       gameInstance = container;
     }
     
-    if (gameInstance && child.type === 'scene') {
-      const index = gameInstance.children.indexOf(child as SceneInstance);
+    if (gameInstance && child.type === 'layer') {
+      const index = gameInstance.children.indexOf(child as LayerInstance);
       if (index !== -1) {
         gameInstance.children.splice(index, 1);
-        (child as SceneInstance).parent = undefined;
+        (child as LayerInstance).parent = undefined;
       }
     }
   },
