@@ -1,6 +1,6 @@
 import type { RenderAdapter } from './RenderAdapter';
-import type { SpriteProps } from '../components/Sprite';
-import type { SceneProps } from '../components/Scene';
+import type { SpriteProps } from '../components/Core/Sprite';
+import type { SceneProps } from '../components/Core/Scene';
 
 interface ComponentInfo {
   type: string;

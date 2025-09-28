@@ -1,6 +1,6 @@
 import { useEffect, useContext, useRef } from "react";
-import type { UpdateCallback } from "../components/Game";
-import { GameLoopContext } from "../components/Game";
+import type { UpdateCallback } from "../components/Core/Game";
+import { GameLoopContext } from "../components/Core/Game";
 
 // Hook for game loop updates
 export function useGameLoop(callback: UpdateCallback) {

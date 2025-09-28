@@ -1,5 +1,5 @@
 import React from "react";
-import { ManifestProvider } from "../manifest/ManifestContext";
+import { ManifestProvider } from "../../manifest/ManifestContext";
 
 export interface SceneProps {
   width?: number;

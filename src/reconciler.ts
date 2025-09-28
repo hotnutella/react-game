@@ -1,8 +1,8 @@
 import Reconciler from 'react-reconciler';
 import type { RenderAdapter } from './adapters';
-import type { SpriteProps } from './components/Sprite';
-import type { SceneProps } from './components/Scene';
-import type { GameProps } from './components/Game';
+import type { SpriteProps } from './components/Core/Sprite';
+import type { SceneProps } from './components/Core/Scene';
+import type { GameProps } from './components/Core/Game';
 
 // Game objects that will be managed by the reconciler
 export interface GameObject {
@@ -249,6 +249,10 @@ const hostConfig: Reconciler.HostConfig<
     instance.props = nextProps;
 
     if (instance.type === 'sprite' && instance.nativeObject) {
+      // Update the componentInfo in the sprite's nativeObject
+      if (instance.nativeObject.componentInfo) {
+        instance.nativeObject.componentInfo.props = { ...nextProps };
+      }
       currentAdapter.updateSprite(instance.nativeObject, nextProps as SpriteProps);
     } else if (instance.type === 'scene' && instance.nativeObject) {
       currentAdapter.updateScene(instance.nativeObject, nextProps as SceneProps);

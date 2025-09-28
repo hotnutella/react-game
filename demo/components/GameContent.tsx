@@ -6,6 +6,7 @@ import { AnimatedSprites } from "./AnimatedSprites";
 import { ControlledAnimation } from "./ControlledAnimation";
 import { KeyboardControlledSprite } from "./KeyboardControlledSprite";
 import { MouseLogger } from "./MouseLogger";
+import { InteractiveDemo } from "./InteractiveDemo";
 
 // Component that uses manifest - must be inside Scene
 export function GameContent() {
@@ -33,6 +34,7 @@ export function GameContent() {
       <AnimatedSprites assets={assets} />
       <ControlledAnimation />
       <KeyboardControlledSprite />
+      <InteractiveDemo />
       <MouseLogger />
       {/* Static sprites for reference */}
       <Sprite x={600} y={500} width={30} height={30} />

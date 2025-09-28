@@ -2,11 +2,10 @@ import React, {
   useState,
   useRef,
   useCallback,
-  useEffect,
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { useGameLoop } from "../hooks";
+import { useGameLoop } from "../../hooks";
 
 // Animation properties that can be animated
 export interface AnimatableProps {

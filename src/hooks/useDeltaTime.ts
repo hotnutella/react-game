@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { GameLoopContext } from "../components/Game";
+import { GameLoopContext } from "../components/Core/Game";
 
 // Hook to get current delta time
 export function useDeltaTime(): number {

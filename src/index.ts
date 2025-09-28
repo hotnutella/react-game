@@ -1,11 +1,11 @@
 import React from 'react';
 import { GameReconciler, setCurrentAdapter } from './reconciler';
 import { CanvasAdapter } from './adapters/CanvasAdapter';
-import type { UpdateCallback } from './components/Game';
+import type { UpdateCallback } from './components/Core/Game';
 import { GameLoopContext } from './components';
 
-export { Game, Scene, Sprite, Animation, GameLoopContext, Easing } from './components';
-export type { GameProps, SceneProps, SpriteProps, AnimationProps, AnimatableProps, EasingFunction, AnimationControls, UpdateCallback } from './components';
+export { Game, Scene, Sprite, Animation, Interactive, GameLoopContext, Easing } from './components';
+export type { GameProps, SceneProps, SpriteProps, AnimationProps, AnimatableProps, EasingFunction, AnimationControls, UpdateCallback, InteractiveProps, InteractiveEventHandlers } from './components';
 export { useGameLoop, useDeltaTime, useUpdate, useKeyboard, useMouse, MouseButtons } from './hooks';
 export type { KeyboardState, MouseState, MousePosition, MouseMovement, DragEvent } from './hooks';
 export { useManifest, withManifestProvider } from './manifest';

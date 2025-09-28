@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useCallback, createContext } from "react";
-import { GameReconciler, setCurrentAdapter } from "../reconciler";
-import { CanvasAdapter } from "../adapters/CanvasAdapter";
-import type { RenderAdapter } from "../adapters";
+import { GameReconciler, setCurrentAdapter } from "../../reconciler";
+import { CanvasAdapter } from "../../adapters/CanvasAdapter";
+import type { RenderAdapter } from "../../adapters";
 
 // Types
 export interface GameProps {

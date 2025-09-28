@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { ManifestContext } from "../manifest/ManifestContext";
+import { ManifestContext } from "../../manifest/ManifestContext";
 
 export interface SpriteProps {
   x?: number;

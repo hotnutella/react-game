@@ -5,3 +5,4 @@ export { AnimatedSprites } from "./AnimatedSprites";
 export { UIElements } from "./UIElements";
 export { GameContent } from "./GameContent";
 export { DemoGame } from "./DemoGame";
+export { InteractiveDemo } from "./InteractiveDemo";
