@@ -4,8 +4,8 @@ import type { MousePosition, DragEvent } from "../../src/hooks";
 
 // Interactive Demo Component - Shows how to use the Interactive wrapper
 export function InteractiveDemo() {
-  const [isDragging, setIsDragging] = useState(false);
   const [spritePosition, setSpritePosition] = useState({ x: 100, y: 100 });
+  const [interactiveAlpha, setInteractiveAlpha] = useState(0.3);
 
   const handleLeftClick = useCallback((position: MousePosition) => {
     console.log(`Left clicked at (${position.x}, ${position.y})`);
@@ -27,7 +27,6 @@ export function InteractiveDemo() {
   );
 
   const handleDragStart = useCallback((dragEvent: DragEvent) => {
-    setIsDragging(true);
     console.log(
       `Drag started at (${dragEvent.startPosition.x}, ${dragEvent.startPosition.y})`
     );
@@ -42,17 +41,18 @@ export function InteractiveDemo() {
   }, []);
 
   const handleDragEnd = useCallback((dragEvent: DragEvent) => {
-    setIsDragging(false);
     console.log(
       `Drag ended at (${dragEvent.currentPosition.x}, ${dragEvent.currentPosition.y})`
     );
   }, []);
 
   const handleMouseEnter = useCallback((position: MousePosition) => {
+    setInteractiveAlpha(1);
     console.log(`Mouse entered at (${position.x}, ${position.y})`);
   }, []);
 
   const handleMouseLeave = useCallback((position: MousePosition) => {
+    setInteractiveAlpha(0.3);
     console.log(`Mouse left at (${position.x}, ${position.y})`);
   }, []);
 
@@ -111,7 +111,7 @@ export function InteractiveDemo() {
           width={50}
           height={50}
           texture="sample.svg"
-          alpha={isDragging ? 0.7 : 1.0}
+          alpha={interactiveAlpha}
         />
       </Interactive>
 
